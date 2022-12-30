@@ -1,0 +1,181 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package br.com.cpqd.asr.grpc;
+
+message RecognitionConfig {
+    repeated LanguageModel lm = 1;
+    AudioEncoding audio_encoding = 2;
+     int32 sample_rate = 3;
+
+     EndpointerConfig endpointer = 4;
+
+     string word_hints = 5;
+     bool textify_enabled = 6;
+     string textify_formatting_rules = 7;
+     int32 noinput_timeout = 8;
+     bool noinput_timeout_enabled = 9;
+     int32 recognition_timeout = 10;
+     bool recognition_timeout_enabled = 11;
+     int32 confidence_threshold = 12;
+     int32 max_sentences = 13;
+     bool continuous_mode = 14;
+     WordDetails word_details = 15;
+     string logging_tag = 16;
+     string account_tag = 17;
+     bool age_scores_enabled = 18;
+     bool gender_scores_enabled = 19;
+     bool emotion_scores_enabled = 20;
+     string channel_identifier = 21;
+     bool verify_buffer_utterance = 22;
+     bool start_input_timers = 23;
+     bool endpointer_enabled = 24;
+
+    message LanguageModel {
+         string content_type = 1;
+         string uri = 2;
+         string definition = 3;
+         string id = 4;
+    }
+    
+    enum AudioEncoding {
+        UNSPECIFIED = 0;
+        LINEAR16 = 1;
+        WAV = 2;
+        ALAW = 3;
+        MULAW = 4;
+        MP3 = 5;
+        OGG_OPUS = 6;
+        OGG_VORBIS = 7;
+        FLAC = 8;
+    }
+
+    message EndpointerConfig {
+         bool use_tone_detectors = 1;
+         int32 head_margin = 2;
+         int32 tail_margin = 3;
+         int32 wait_end = 4;
+         LevelMode level_mode = 5;
+         int32 level_threshold = 6;
+         int32 auto_level_len = 7;
+
+        enum LevelMode {
+            IGNORE = 0;
+            AUTO = 1;
+            FIXED = 2;
+        }
+    }
+
+    enum WordDetails {
+        NONE = 0;
+        FIRST = 1;
+        ALL = 2;
+    }
+}
+
+enum RecognitionEvent {
+    START_OF_SPEECH = 0;
+    END_OF_SPEECH = 1;
+    RECOGNITION_RESULT = 2;
+    FAILURE = 3;
+    TIMEOUT = 4;
+    INVALID_REQUEST = 5;
+    LISTENING = 6;
+}
+
+message RecognitionResult {
+    RecognitionStatus status = 1;
+     int32 segment_index = 2;
+     bool last_segment = 3;
+     bool final_result = 4;
+     float start_time = 5;
+     float end_time = 6;
+    repeated RecognitionAlternative alternatives = 7;
+
+    enum RecognitionStatus {
+        NONE = 0;
+        PROCESSING = 1;
+        RECOGNIZED = 2;
+        NO_MATCH = 3;
+        NO_INPUT_TIMEOUT = 4;
+        MAX_SPEECH = 5;
+        EARLY_SPEECH = 6;
+        RECOGNITION_TIMEOUT = 7;
+        NO_SPEECH = 8;
+        CANCELED = 9;
+        FAILURE = 10;
+    }
+
+    message RecognitionAlternative {
+        string text = 1;
+        int32 score = 2;
+        string lm = 3;
+        repeated string interpretations = 4;
+        repeated int32 interpretation_scores = 5;
+        repeated Words words = 6;
+
+        message Words {
+            string text = 1;
+            int32 score = 2;
+            float startTime = 3;
+            float endTime = 4;
+        }
+    }
+
+     GenderScore gender_score = 8;
+    message GenderScore {
+         string event = 1;
+         string gender = 2;
+        repeated double p = 3;
+    }
+
+     AgeScore age_score = 9;
+    message AgeScore {
+         string event = 1;
+         int32 age = 2;
+         string confidence = 3;
+        map<string, double> p = 4;
+    }
+
+     EmotionScore emotion_score = 10;
+    message EmotionScore {
+         string event = 1;
+         string emotion = 2;
+         string group = 3;
+        map<string, double> p = 4;
+        map<string, double> p_groups = 5;
+    }
+}
+
+message RecognizeRequest {
+    RecognitionConfig config = 1;
+     int32 timeout = 2;
+    bytes media = 3;
+}
+
+message RecognizeResponse {
+     RecognitionEvent event = 1;
+     string error_code = 2;
+     string error_message = 3;
+    repeated RecognitionResult result = 4;
+     int64 audio_duration = 5;
+}
+
+message StreamingRecognizeRequest {
+     RecognitionConfig config = 1;
+     int32 timeout = 2;
+     bool last_packet = 3;
+     bytes media = 4;
+}
+
+message StreamingRecognizeResponse {
+    RecognitionEvent event = 1;
+     string error_code = 2;
+     string error_message = 3;
+    repeated RecognitionResult result = 4;
+     int64 audio_duration = 5;
+}
+
+service RecognizeService {
+    rpc Recognize(RecognizeRequest) returns (RecognizeResponse);
+    rpc StreamingRecognize(stream StreamingRecognizeRequest) returns (stream StreamingRecognizeResponse);
+}
