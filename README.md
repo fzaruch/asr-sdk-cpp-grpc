@@ -1,5 +1,5 @@
 
-# Recognition via gRPC (++)
+# Recognition via gRPC (C++)
 
 ## To compile:
 1. install google glogs
