@@ -47,7 +47,9 @@ target_link_libraries(rg_grpc_proto
   ${_PROTOBUF_LIBPROTOBUF})
 
 foreach(_target
-  recognize_client)
+  recognize_client
+  recognize_client_async
+  )
   add_executable(${_target}
     "${_target}.cc"
     "audio_source.cc"
