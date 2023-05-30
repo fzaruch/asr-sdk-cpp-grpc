@@ -17,8 +17,8 @@ cmake ..
 make
 ```
 
-## To Compile withdocker
-#### Make imamge to build
+## To Compile with Docker
+#### Make image to build
 
 ```
 cd docker
