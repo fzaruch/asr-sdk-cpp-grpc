@@ -12,6 +12,6 @@ RUN apt-get update && \
     libgoogle-glog-dev \
     cmake \
     build-essential \
-    build-essential && \
+    libboost-dev && \
     apt-get autoremove -y
 
