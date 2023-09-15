@@ -73,6 +73,7 @@ class RecognizeClient {
       rec_config->set_age_scores_enabled(config->age_scores_enabled);
       rec_config->set_emotion_scores_enabled(config->emotion_scores_enabled);
       rec_config->set_gender_scores_enabled(config->gender_scores_enabled);
+      rec_config->set_audio_encoding(RecognitionConfig::LINEAR16);
       RecognitionConfig::LanguageModel* language = rec_config->add_lm();
       language->set_uri("builtin:slm/general");
       language->set_content_type("text/uri-list");
@@ -153,10 +154,11 @@ int main(int argc, char** argv) {
   bool gender_scores_enabled = false;
   bool emotion_scores_enabled = false;
   char c;
+  int N = 1;
 
   google::InitGoogleLogging("/tmp/recognize.log");
 
-  while ((c = getopt (argc, argv, "ogeca:p:f:")) != -1)
+  while ((c = getopt (argc, argv, "ogeca:p:f:n:")) != -1)
     //std::cout << "Option: " << c << std::endl;
     switch (c) {
       case 'a':
@@ -175,6 +177,9 @@ int main(int argc, char** argv) {
       case 'o':
         std::cout << "Age Score enabled\n";
         age_scores_enabled = true;
+        break;
+      case 'n':
+        N = std::stoi(optarg);
         break;
       case 'e':
         std::cout << "Emotion Score enabled\n";
@@ -205,11 +210,19 @@ int main(int argc, char** argv) {
                                             .age_scores_enabled = age_scores_enabled,
                                             .emotion_scores_enabled = emotion_scores_enabled,
                                             .gender_scores_enabled = gender_scores_enabled };
-  RecognizeClient recognizer(
-      grpc::CreateChannel(server_url.c_str(),
-                          grpc::InsecureChannelCredentials()), config);
+  std::vector<RecognizeClient*> _vec;
+  std::vector<std::thread*> _vec_t;
 
-  recognizer.DoRecognize();
+  for (int i = 0; i < N; ++i) {
+    auto * _p_client = new RecognizeClient(grpc::CreateChannel(server_url,
+                          grpc::InsecureChannelCredentials()), config);
+    _vec.push_back(_p_client);
+  }
+  for (uint32_t i = 0; i < N; i++)
+        _vec_t.push_back(new std::thread(&RecognizeClient::DoRecognize, _vec[i]));
+
+  for (int i = 0; i < N; i++)
+    _vec_t[i]->join();
 
   return 0;
 }

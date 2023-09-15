@@ -7,10 +7,20 @@ if (BUILD_DEBUG)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+set(CMAKE_CXX_STANDARD 14)
+
 include(cmake/common.cmake)
+
 set(Glog_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(Glog REQUIRED)
 INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
+
+if(NOT TARGET absl::strings)
+  find_package(absl CONFIG)
+endif()
+if(NOT TARGET utf8_range)
+  find_package(utf8_range CONFIG)
+endif()
 
 # Proto file
 get_filename_component(rg_proto "proto/RecognizeService.proto" ABSOLUTE)

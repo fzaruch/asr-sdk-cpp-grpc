@@ -159,6 +159,7 @@ class RecognizeClient {
       rec_config->set_age_scores_enabled(config->age_scores_enabled);
       rec_config->set_emotion_scores_enabled(config->emotion_scores_enabled);
       rec_config->set_gender_scores_enabled(config->gender_scores_enabled);
+      rec_config->set_audio_encoding(RecognitionConfig::LINEAR16);
       RecognitionConfig::LanguageModel* language = rec_config->add_lm();
       language->set_uri("builtin:slm/general");
       language->set_content_type("text/uri-list");
