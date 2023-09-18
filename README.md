@@ -31,6 +31,9 @@ cd ..
 ```
 docker run -it --rm -v $PWD:/src -w /src asr-grpc-build bash
 mkdir build; cd build
+# to build with gPRC inside of build image
+cmake ..
+# To fetch gPRC during compilation
 cmake -D GRPC_FETCHCONTENT=1 ..
 make -j 4
 ```
